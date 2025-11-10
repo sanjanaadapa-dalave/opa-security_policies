@@ -8,4 +8,3 @@ GCP security policies for Terraform infrastructure validation.
 - Networking
 - IAM
 
-Maintained by Security Team
