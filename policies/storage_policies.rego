@@ -33,26 +33,29 @@ deny[msg] {
     msg := sprintf("Storage bucket '%s' does not have uniform bucket-level access enabled.", [resource.name])
 }
 
-# Deny buckets without versioning
+# Deny buckets without versioning enabled
 deny[msg] {
     resource := resources[_]
     resource.type == "google_storage_bucket"
     
-    # Check versioning - it's a nested object with enabled field
+    # Check versioning - it's a nested array with enabled field
+    versioning := object.get(resource.values, "versioning", [])
+    
+    # Fail if versioning is missing OR if it exists but enabled=false
+    count(versioning) == 0
+    
+    msg := sprintf("Storage bucket '%s' does not have versioning configured.", [resource.name])
+}
+
+deny[msg] {
+    resource := resources[_]
+    resource.type == "google_storage_bucket"
+    
+    # Check if versioning exists but is disabled
     versioning := object.get(resource.values, "versioning", [])
     count(versioning) > 0
     version_config := versioning[0]
-    not version_config.enabled
+    version_config.enabled == false
     
-    msg := sprintf("Storage bucket '%s' does not have versioning enabled.", [resource.name])
-}
-
-# Alternative check for missing versioning entirely
-deny[msg] {
-    resource := resources[_]
-    resource.type == "google_storage_bucket"
-    
-    not resource.values.versioning
-    
-    msg := sprintf("Storage bucket '%s' does not have versioning configured.", [resource.name])
+    msg := sprintf("Storage bucket '%s' has versioning disabled.", [resource.name])
 }
