@@ -69,7 +69,8 @@ deny[msg] {
     resource.type == "google_compute_instance"
     
     boot_disk := resource.values.boot_disk[_]
+    not boot_disk.kms_key_self_link
     not boot_disk.disk_encryption_key
     
-    msg := sprintf("GCE instance '%s' boot disk is not encrypted with customer-managed key (CMEK).", [resource.name])
+    msg := sprintf("GCE instance '%s' boot disk is not encrypted with customer-managed key (CMEK). Add kms_key_self_link to boot_disk.", [resource.name])
 }
