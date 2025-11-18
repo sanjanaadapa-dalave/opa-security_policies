@@ -17,7 +17,8 @@ deny contains msg if {
     resource.type == "google_storage_bucket"
     
     # Check uniform bucket level access
-    resource.values.uniform_bucket_level_access == false
+    uniform_access := resource.values.uniform_bucket_level_access[_]
+    not uniform_access.enabled
     
     msg := sprintf("Storage bucket '%s' does not have uniform bucket-level access enabled.", [resource.name])
 }
