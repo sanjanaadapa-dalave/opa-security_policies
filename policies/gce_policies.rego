@@ -63,14 +63,22 @@ deny[msg] {
     msg := sprintf("GCE instance '%s' uses overly broad 'cloud-platform' scope. Use specific scopes instead.", [resource.name])
 }
 
-# Deny instances without disk encryption
+# Deny instances without disk encryption (check configuration for references)
 deny[msg] {
-    resource := resources[_]
+    # Get instance from resource_changes
+    resource := input.resource_changes[_]
     resource.type == "google_compute_instance"
+    instance_name := resource.name
     
-    boot_disk := resource.values.boot_disk[_]
-    not boot_disk.kms_key_self_link
-    not boot_disk.disk_encryption_key
+    # Find corresponding configuration
+    config := input.configuration.root_module.resources[_]
+    config.type == "google_compute_instance"
+    config.name == instance_name
     
-    msg := sprintf("GCE instance '%s' boot disk is not encrypted with customer-managed key (CMEK). Add kms_key_self_link to boot_disk.", [resource.name])
+    # Check if boot_disk has kms_key_self_link in configuration
+    boot_disk_config := config.expressions.boot_disk[_]
+    not boot_disk_config.kms_key_self_link
+    not boot_disk_config.disk_encryption_key_raw
+    
+    msg := sprintf("GCE instance '%s' boot disk is not encrypted with customer-managed key (CMEK). Add kms_key_self_link to boot_disk.", [instance_name])
 }
