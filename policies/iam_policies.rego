@@ -23,7 +23,8 @@ deny[msg] {
     ]
     
     role := object.get(resource.values, "role", "")
-    role in dangerous_roles
+    dangerous_role := dangerous_roles[_]
+    role == dangerous_role
     
     msg := sprintf("IAM binding grants overly permissive role '%s'. Use principle of least privilege with specific roles.", [role])
 }
@@ -42,7 +43,8 @@ deny[msg] {
     ]
     
     role := object.get(resource.values, "role", "")
-    role in dangerous_roles
+    dangerous_role := dangerous_roles[_]
+    role == dangerous_role
     
     msg := sprintf("IAM member grants overly permissive role '%s'. Use principle of least privilege with specific roles.", [role])
 }

@@ -56,7 +56,9 @@ deny[msg] {
     resource.type == "google_compute_instance"
     
     service_account := resource.values.service_account[_]
-    "https://www.googleapis.com/auth/cloud-platform" in service_account.scopes
+    scopes := service_account.scopes
+    scope := scopes[_]
+    scope == "https://www.googleapis.com/auth/cloud-platform"
     
     msg := sprintf("GCE instance '%s' uses overly broad 'cloud-platform' scope. Use specific scopes instead.", [resource.name])
 }

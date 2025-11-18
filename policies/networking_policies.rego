@@ -16,7 +16,8 @@ deny[msg] {
     
     # Check if source includes 0.0.0.0/0
     source_ranges := object.get(resource.values, "source_ranges", [])
-    "0.0.0.0/0" in source_ranges
+    source := source_ranges[_]
+    source == "0.0.0.0/0"
     
     # Check for dangerous ports
     dangerous_ports := ["22", "3389", "1433", "3306", "5432", "5984", "6379", "7000", "7001", "8020", "8888", "9042", "9160", "9200", "9300", "11211", "27017", "50070"]
@@ -24,7 +25,7 @@ deny[msg] {
     allow_rule := resource.values.allow[_]
     ports := object.get(allow_rule, "ports", [])
     port := ports[_]
-    port in dangerous_ports
+    port == dangerous_ports[_]
     
     msg := sprintf("Firewall rule '%s' allows dangerous port %s from 0.0.0.0/0 (internet). Restrict source ranges.", [resource.name, port])
 }
